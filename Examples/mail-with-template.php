@@ -31,7 +31,7 @@ return array(
 /**
  * -----------------------------------------------------------------------------
  * Email body template:
- * <Yii director>/protected/views/mail/mail.php
+ * <Yii directory>/protected/views/mail/mail.php
  * -----------------------------------------------------------------------------
  */
 
