@@ -44,3 +44,33 @@ How to use it
 You can chain the methods like:
 
     Yii::app()->MultiMailer->to('example@server.com', 'Recipient')->subject('Example email subject')->body('<h1>Hello</h1><p>This is test.<br>MultiMailer test.</p>')->send();
+
+Special case: emails in database
+================================
+
+You can use MultiMailer to save email in database instead of sending it immediately. Email will be prepared using the PHPMailer as well.
+
+First the configuration:
+
+    return array(
+        'components' => array(
+            'MultiMailer' => array(
+                'class' => 'ext.MultiMailer.MultiMailer',
+                'setFromAddress' => 'from@yourwebsite.com',
+                'setFromName' => 'Your Website',
+                'setMethod' => 'DB',
+                'setDbModel' => 'Email',
+            ),
+        ),
+    );
+
+You need to prepare the database table for email storage with Active Record model class ('Email' in the example above). Default table columns are:
+- 'email' 
+- 'name'
+- 'subject'
+- 'body'
+- 'alt'
+
+See the documentation for information about adding or switching the columns off.
+
+The usage in this case is the same as before but remember that method send() will not actually *send* the email but will save it in database.
