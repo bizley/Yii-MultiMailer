@@ -26,3 +26,21 @@ Modify the main.php config file. For example:
   
 This sets MultiMailer to send email using PHP mail() function with sender 'Your Website <from@yourwebsite.com>'.
 You can find more configuration examples in Examples folder (as soon as I add it).
+
+How to use it
+=============
+
+    $mailer = Yii::app()->MultiMailer->to('example@server.com', 'Recipient');
+    $mailer->subject('Example email subject');
+    $mailer->body('<h1>Hello</h1><p>This is test.<br>MultiMailer test.</p>');
+
+    if ($mailer->send()) {
+        // success
+    }
+    else {
+        // error
+    }
+
+You can chain the methods like:
+
+    Yii::app()->MultiMailer->to('example@server.com', 'Recipient')->subject('Example email subject')->body('<h1>Hello</h1><p>This is test.<br>MultiMailer test.</p>')->send();
