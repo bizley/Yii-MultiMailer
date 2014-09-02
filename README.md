@@ -25,7 +25,7 @@ Modify the main.php config file. For example:
     );
   
 This sets MultiMailer to send email using PHP mail() function with sender 'Your Website <from@yourwebsite.com>'.
-You can find more configuration examples in Examples folder (as soon as I add it).
+You can find more configuration examples in Examples folder.
 
 How to use it
 =============
