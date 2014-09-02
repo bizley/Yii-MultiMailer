@@ -5,12 +5,19 @@
  * 
  * MultiMailer is the Yii extension created to send or store emails in database
  * with the help of the amazing PHPMailer class.
+ * @see https://github.com/bizley-code/Yii-MultiMailer
  * 
- * MultiMailer uses PHPMailer version 5.2.8
+ * See Examples folder for configuration and usage examples.
+ * 
+ * MultiMailer requires Yii version 1.1.
+ * @see http://www.yiiframework.com
+ * @see https://github.com/yiisoft/yii
+ * 
+ * MultiMailer 1.0 uses PHPMailer version 5.2.8.
  * @see http://phpmailer.worxware.com
  * @see https://github.com/Synchro/PHPMailer
  * 
- * @todo CC and BCC headers
+ * @todo CC and BCC headers, sendmail, qmail
  */
 
 require_once \dirname(__FILE__) . DIRECTORY_SEPARATOR . 'PHPMailer' . DIRECTORY_SEPARATOR . 'PHPMailerAutoload.php';
@@ -128,7 +135,7 @@ class MultiMailer extends CApplicationComponent
     
     /**
      * PUBLIC PROPERTIES =======================================================
-     * Change from the Yii main config.
+     * Changed from the Yii main config.
      */
     
     /**
@@ -378,6 +385,7 @@ class MultiMailer extends CApplicationComponent
      * Set default options and headers for PHPMailer.
      * @see setDefaultPHPMailerOptions()
      * Set additional options for PHPMailer.
+     * You can set here any option that PHPMailer allows.
      * @see $setOptions
      * Additional option overwrites the default one of the same name.
      */
@@ -418,8 +426,8 @@ class MultiMailer extends CApplicationComponent
         $this->_phpmailer->Host         = 'mail.example.com';
         $this->_phpmailer->Port         = 25;
         $this->_phpmailer->SMTPAuth     = true;
-        $this->_phpmailer->Username     = "yourname@example.com";
-        $this->_phpmailer->Password     = "yourpassword";
+        $this->_phpmailer->Username     = 'yourname@example.com';
+        $this->_phpmailer->Password     = 'yourpassword';
         
         if ($this->setContentType == 'html') {
             $this->_phpmailer->isHTML();
