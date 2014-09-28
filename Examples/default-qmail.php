@@ -3,8 +3,8 @@
  * @author Pawel Bizley Brzozowski
  * @version 1.1
  * 
- * MultiMailer default MAIL implementation
- * This sets default MAIL method with minimum options.
+ * MultiMailer default QMAIL implementation
+ * This sets default QMAIL method with minimum options.
  */
 
 /**
@@ -22,6 +22,7 @@ return array(
             'class'             => 'ext.MultiMailer.MultiMailer',
             'setFromAddress'    => 'example@example.com',
             'setFromName'       => 'Example',
+            'setMethod'         => 'QMAIL',
         ),
         // ...
     ),
@@ -38,21 +39,14 @@ class ExampleController extends Controller
 {
     public function actionIndex()
     {
-        $recipientEmail     = 'recipient@example.com';
-        $recipientName      = 'Example Name';
-        $recipientCCEmail   = 'CCrecipient@example.com';
-        $recipientCCName    = 'CC Example Name';
-        $recipientBCCEmail  = 'BCCrecipient@example.com';
-        $recipientBCCName   = 'BCC Example Name';
-        $emailSubject       = 'Example email subject';
-        $emailBody          = '<h1>Hello</h1><p>This is test.<br>MultiMailer test.</p>';
+        $recipientEmail = 'recipient@example.com';
+        $recipientName  = 'Example Name';
+        $emailSubject   = 'Example email subject';
+        $emailBody      = '<h1>Hello</h1><p>This is test.<br>MultiMailer test.</p>';
         
-        $mailer = Yii::app()->MultiMailer
-                                ->to($recipientEmail, $recipientName)
-                                ->cc($recipientCCEmail, $recipientCCName)
-                                ->bcc($recipientBCCEmail, $recipientBCCName)
-                                ->subject($emailSubject)
-                                ->body($emailBody);
+        $mailer = Yii::app()->MultiMailer->to($recipientEmail, $recipientName);
+        $mailer->subject($emailSubject);
+        $mailer->body($emailBody);
 
         if ($mailer->send()) {
             $result = 'Test email has been sent successfully.';

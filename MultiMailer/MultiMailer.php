@@ -1,7 +1,7 @@
 <?php
 /**
  * @author Pawel Bizley Brzozowski
- * @version 1.0
+ * @version 1.1
  * 
  * MultiMailer is the Yii extension created to send or store emails in database
  * with the help of the amazing PHPMailer class.
@@ -13,11 +13,18 @@
  * @see http://www.yiiframework.com
  * @see https://github.com/yiisoft/yii
  * 
- * MultiMailer 1.0 uses PHPMailer version 5.2.8.
+ * MultiMailer 1.1 uses PHPMailer version 5.2.8.
  * @see http://phpmailer.worxware.com
  * @see https://github.com/Synchro/PHPMailer
  * 
- * @todo CC and BCC headers, sendmail, qmail
+ * Available methods:
+ * mail()
+ * SMTP
+ * Gmail
+ * POP before SMTP
+ * Sendmail
+ * qmail
+ * database storage
  */
 
 require_once \dirname(__FILE__) . DIRECTORY_SEPARATOR . 'PHPMailer' . DIRECTORY_SEPARATOR . 'PHPMailerAutoload.php';
@@ -68,6 +75,7 @@ class MultiMailer extends CApplicationComponent
     const ERR_DB_PROPERTY_TYPE          = 'Database AR email model property must be of string or null type.';
     const ERR_EMAIL_INVALID             = 'Invalid email address.';
     const ERR_PHPMAILER_NOT_SET         = 'PHPMailer need to be set first.';
+    const ERR_POP3_NOT_SET              = 'PHPMailer POP3 options not set.';
     const ERR_YII_CONTROLLER_NOT_SET    = 'Yii controller is not set.';
     
     /**
@@ -102,6 +110,7 @@ class MultiMailer extends CApplicationComponent
     
     /**
      * @var array list of recipients' email addresses, default array().
+     * CC and BCC recipients are stored here as well when using DB method.
      */
     protected $_addresses = array();
     
@@ -112,13 +121,13 @@ class MultiMailer extends CApplicationComponent
 
     /**
      * @var string baseline directory for images path, default ''.
-     * @see PHPMailer::msgHTML()
+     * @see PHPMailer::msgHTML
      */
     protected $_bodyBasedir = '';
     
     /**
      * @var boolean advanced HTML to text converter flag default false.
-     * @see PHPMailer::msgHTML()
+     * @see PHPMailer::msgHTML
      */
     protected $_bodyAdvanced = false;
     
@@ -147,17 +156,39 @@ class MultiMailer extends CApplicationComponent
      *  'SMTPAuth' => true,
      * )
      * Some PHPMailer options are set by default so you don't need to set everything.
-     * @see setDefaultPHPMailerOptions()
+     * @see setDefaultPHPMailerOptions
      * @see PHPMailer documentation for details
      */
     public $setOptions = array();
     
     /**
+     * @var array options for PHPMailer POP3, default array().
+     * You can set any available options for PHPMailer POP3 here i.e.
+     * array(
+     *  'Host' => 'pop3.example.com',
+     *  'Port' => 110, // default value
+     *  'Timeout' => 30,  // default value
+     *  'Username' => 'username',
+     *  'Password' => 'password',
+     *  'Debug' => 0,  // default value
+     * )
+     * Options marked above as default can be skipped.
+     * Option 'Host' will be used as STMP 'Host' so you don't have to set 
+     * it twice.
+     * @see PHPMailer POP3 class documentation for details
+     */
+    public $setPopOptions = array();
+    
+    /**
      * @var string method for email sending, default 'MAIL'.
      * Options:
-     * 'MAIL'   use PHP's mail function [http://php.net/manual/en/function.mail.php]
-     * 'SMTP'   use SMTP server [http://en.wikipedia.org/wiki/Simple_Mail_Transfer_Protocol]
-     * 'DB'     store email in database instead of sending it immediately
+     * 'MAIL'       use PHP's mail function [http://php.net/manual/en/function.mail.php]
+     * 'SMTP'       use SMTP server [http://en.wikipedia.org/wiki/Simple_Mail_Transfer_Protocol]
+     * 'GMAIL'      use Google SMTP server
+     * 'POP3'       use POP3 before SMTP [http://en.wikipedia.org/wiki/Post_Office_Protocol]
+     * 'SENDMAIL'   use Sendmail [http://en.wikipedia.org/wiki/Sendmail]
+     * 'QMAIL'      use qmail [http://en.wikipedia.org/wiki/Qmail]
+     * 'DB'         store email in database instead of sending it immediately
      */
     public $setMethod = 'MAIL';
     
@@ -196,7 +227,7 @@ class MultiMailer extends CApplicationComponent
     
     /**
      * @var boolean flag to switch logging on, default true.
-     * @see Yii::log()
+     * @see Yii::log
      */
     public $setLogging = true;
     
@@ -235,7 +266,7 @@ class MultiMailer extends CApplicationComponent
     
     /**
      * @var boolean flag to set PHPMailer throwing external exceptions, default true.
-     * @see PHPMailer::__construct()
+     * @see PHPMailer::__construct
      */
     public $setExternalExceptions = true;
     
@@ -244,7 +275,7 @@ class MultiMailer extends CApplicationComponent
      */
     
     /**
-     * Initialise the MultiMailer object.
+     * Initialises the MultiMailer object.
      */
     public function init()
     {
@@ -253,12 +284,12 @@ class MultiMailer extends CApplicationComponent
     }
     
     /**
-     * Initialise email sending method based on $setMethod.
+     * Initialises email sending method based on $setMethod.
      * @see $setMethod
-     * Initialise the PHPMailer object with external exceptions flag.
-     * @see PHPMailer::__construct()
+     * Initialises the PHPMailer object with external exceptions flag.
+     * @see PHPMailer::__construct
      * Set PHPMailer options.
-     * @see setPHPMailerOptions()
+     * @see MultiMailer::setPHPMailerOptions
      */
     protected function _initMethod()
     {
@@ -271,6 +302,18 @@ class MultiMailer extends CApplicationComponent
             
             case 'SMTP':
                 return $this->_initSMTP();
+                
+            case 'POP3':
+                return $this->_initPOP3();
+                
+            case 'GMAIL':
+                return $this->_initGMAIL();
+                
+            case 'SENDMAIL':
+                return $this->_initSENDMAIL();
+                
+            case 'QMAIL':
+                return $this->_initQMAIL();
             
             default:
                 return $this->_initMAIL();
@@ -278,7 +321,7 @@ class MultiMailer extends CApplicationComponent
     }
     
     /**
-     * Initialise the MAIL method.
+     * Initialises the MAIL method.
      * Emails are sent using mail() function.
      * @see http://php.net/manual/en/function.mail.php
      * This is the default method.
@@ -290,7 +333,7 @@ class MultiMailer extends CApplicationComponent
     }
     
     /**
-     * Initialise the SMTP method.
+     * Initialises the SMTP method.
      * Emails are sent using SMTP server.
      * This method requires $setOptions for SMTP credentials.
      * Below are the default ones:
@@ -303,7 +346,7 @@ class MultiMailer extends CApplicationComponent
      *  'SMTPDebug'     => 0,
      *  'Debugoutput'   => 'html',
      * )
-     * @see PHPMailer::smtpConnect()
+     * @see PHPMailer::smtpConnect
      * This method requires PHPMailer to be initialised first.
      * @return boolean
      */
@@ -321,12 +364,102 @@ class MultiMailer extends CApplicationComponent
     }
     
     /**
-     * Initialise the DB method
+     * Initialises the POP before SMTP method.
+     * Emails are sent using SMTP server with POP3 authentication.
+     * This method requires $setPopOptions for POP3 authentication.
+     * @see MultiMailer::_authorisePOP3
+     * @see POP3::authorise
+     * This method requires PHPMailer to be initialised first.
+     * @return boolean
+     */
+    protected function _initPOP3()
+    {
+        if (!is_null($this->_phpmailer)) {
+            if ($this->_authorisePOP3()) {
+                $this->_phpmailer->isSMTP();
+            }
+            else {
+                return false;
+            }
+        }
+        else {
+            $this->setMultiError(self::ERR_PHPMAILER_NOT_SET);
+            return false;
+        }
+        
+        return true;
+    }
+    
+    /**
+     * Initialises the GMAIL method.
+     * Emails are sent using Google SMTP server (Gmail).
+     * This method presets $setOptions for SMTP credentials and requires
+     * only Username (Gmail username) and Password (Gmail password).
+     * This method requires PHPMailer to be initialised first.
+     * @return boolean
+     */
+    protected function _initGMAIL()
+    {
+        if (!is_null($this->_phpmailer)) {
+            $this->_phpmailer->isSMTP();
+            $this->_phpmailer->SMTPAuth     = true;
+            $this->_phpmailer->SMTPSecure   = 'tls';
+            $this->_phpmailer->Host         = 'smtp.gmail.com';
+            $this->_phpmailer->Port         = 587;
+        }
+        else {
+            $this->setMultiError(self::ERR_PHPMAILER_NOT_SET);
+            return false;
+        }
+        
+        return true;
+    }
+    
+    /**
+     * Initialises the SENDMAIL method.
+     * Emails are sent using Sendmail.
+     * This method requires PHPMailer to be initialised first.
+     * @return boolean
+     */
+    protected function _initSENDMAIL()
+    {
+        if (!is_null($this->_phpmailer)) {
+            $this->_phpmailer->isSendmail();
+        }
+        else {
+            $this->setMultiError(self::ERR_PHPMAILER_NOT_SET);
+            return false;
+        }
+        
+        return true;
+    }
+    
+    /**
+     * Initialises the QMAIL method.
+     * Emails are sent using qmail.
+     * This method requires PHPMailer to be initialised first.
+     * @return boolean
+     */
+    protected function _initQMAIL()
+    {
+        if (!is_null($this->_phpmailer)) {
+            $this->_phpmailer->isQmail();
+        }
+        else {
+            $this->setMultiError(self::ERR_PHPMAILER_NOT_SET);
+            return false;
+        }
+        
+        return true;
+    }
+    
+    /**
+     * Initialises the DB method
      * Emails are stored in the database.
-     * @see $setDbModel
+     * @see MultiMailer::$setDbModel
      * Set default model properties.
-     * @see $_defaultColumns
-     * @see $setDbModelColumns
+     * @see MultiMailer::$_defaultColumns
+     * @see MultiMailer::$setDbModelColumns
      * Validate model properties.
      * This method requires $setDbModel to be set (AR model of the database table).
      * @return boolean
@@ -360,7 +493,35 @@ class MultiMailer extends CApplicationComponent
     }
     
     /**
-     * Get error message.
+     * Authorises POP3.
+     * Sets SMTP host.
+     * @see POP3::authorise
+     * @return boolean
+     */
+    protected function _authorisePOP3()
+    {
+        if (empty($this->setPopOptions['host'])) {
+            $this->setMultiError(self::ERR_POP3_NOT_SET);
+            return false;
+        }
+        
+        $host       = $this->setPopOptions['Host'];
+        $port       = !empty($this->setPopOptions['Port']) ? $this->setPopOptions['Port'] : false;
+        $timeout    = !empty($this->setPopOptions['Timeout']) ? $this->setPopOptions['Timeout'] : false;
+        $username   = !empty($this->setPopOptions['Username']) ? $this->setPopOptions['Username'] : '';
+        $password   = !empty($this->setPopOptions['Password']) ? $this->setPopOptions['Password'] : '';
+        $debug      = !empty($this->setPopOptions['Debug']) ? $this->setPopOptions['Debug'] : 0;
+        
+        $pop = new POP3();
+        $pop->authorise($host, $port, $timeout, $username, $password, $debug);
+        
+        $this->_phpmailer->Host = $host;
+        
+        return true;
+    }
+    
+    /**
+     * Gets error message.
      * @return string error message
      */
     public function getMultiError()
@@ -369,9 +530,9 @@ class MultiMailer extends CApplicationComponent
     }
     
     /**
-     * Set and log (optionally) error message.
+     * Sets and logs (optionally) error message.
      * @param string $error error message
-     * @see Yii::log()
+     * @see Yii::log
      */
     public function setMultiError($error)
     {
@@ -382,11 +543,11 @@ class MultiMailer extends CApplicationComponent
     }
     
     /**
-     * Set default options and headers for PHPMailer.
-     * @see setDefaultPHPMailerOptions()
-     * Set additional options for PHPMailer.
+     * Sets default options and headers for PHPMailer.
+     * @see MultiMailer::setDefaultPHPMailerOptions
+     * Sets additional options for PHPMailer.
      * You can set here any option that PHPMailer allows.
-     * @see $setOptions
+     * @see MultiMailer::$setOptions
      * Additional option overwrites the default one of the same name.
      */
     public function setPHPMailerOptions()
@@ -400,11 +561,11 @@ class MultiMailer extends CApplicationComponent
     
     /**
      * Default options for PHPMailer.
-     * Set some headers.
-     * @see from()
-     * @see replyTo()
-     * @see PHPMailer::isHTML()
-     * @see PHPMailer::isSMTP()
+     * Sets some headers.
+     * @see MultiMailer::from
+     * @see MultiMailer::replyTo
+     * @see PHPMailer::isHTML
+     * @see PHPMailer::isSMTP
      * Some of the options explained by PHPMailer:
      * SMTPDebug
      *  0 = off (for production use)
@@ -451,9 +612,27 @@ class MultiMailer extends CApplicationComponent
     }
     
     /**
-     * Add recipient with email address and name for initialised object.
-     * @see PHPMailer::addAddress()
-     * @see _to()
+     * Adds recipient with email address and name to emails array for 
+     * optional DB storage.
+     * @param string $address
+     * @param string $name
+     */
+    protected function _addEmails($address, $name = '')
+    {
+        $address    = trim($address);
+        $name       = trim(preg_replace('/[\r\n]+/', '', $name));
+        if ($this->_phpmailer->validateAddress($address)) {
+            $this->_addresses[$address] = array('email' => $address, 'name' => $name);
+        }
+        else {
+            $this->setMultiError(self::ERR_EMAIL_INVALID);
+        }
+    }
+    
+    /**
+     * Adds recipient with email address and name for initialised object.
+     * @see PHPMailer::addAddress
+     * @see MultiMailer::_to
      * @param string $address recipient's email address
      * @param string $name optional recipient's name
      * @return \MultiMailer
@@ -468,34 +647,91 @@ class MultiMailer extends CApplicationComponent
     }
     
     /**
-     * Add recipient with email address and name.
-     * @see PHPMailer::addAddress()
-     * @see $_addresses
+     * Adds carbon copy recipient with email address and name for 
+     * initialised object.
+     * Note that in case of DB method CC recipients are treated as regular ones.
+     * @see PHPMailer::addCC
+     * @see MultiMailer::_cc
+     * @param string $address CC recipient's email address
+     * @param string $name optional CC recipient's name
+     * @return \MultiMailer
+     */
+    public function cc($address, $name = '')
+    {
+        if ($this->_initState) {
+            $this->_cc($address, $name);
+        }
+        
+        return $this;
+    }
+    
+    /**
+     * Adds blind carbon copy recipient with email address and name for 
+     * initialised object.
+     * Note that in case of DB method BCC recipients are treated as 
+     * regular ones.
+     * @see PHPMailer::addBCC
+     * @see MultiMailer::_bcc
+     * @param string $address BCC recipient's email address
+     * @param string $name optional BCC recipient's name
+     * @return \MultiMailer
+     */
+    public function bcc($address, $name = '')
+    {
+        if ($this->_initState) {
+            $this->_bcc($address, $name);
+        }
+        
+        return $this;
+    }
+    
+    /**
+     * Adds recipient with email address and name.
+     * @see PHPMailer::addAddress
+     * @see MultiMailer::_addEmails
      * @param string $address recipient's email
      * @param string $name optional recipient's name
      */
     protected function _to($address, $name = '')
     {
         $this->_phpmailer->addAddress($address, $name);
-        
-        $address    = trim($address);
-        $name       = trim(preg_replace('/[\r\n]+/', '', $name));
-        if ($this->_phpmailer->validateAddress($address)) {
-            $this->_addresses[] = array('email' => $address, 'name' => $name);
-        }
-        else {
-            $this->setMultiError(self::ERR_EMAIL_INVALID);
-        }
+        $this->_addEmails($address, $name);
     }
     
     /**
-     * Set 'from' header.
-     * @see PHPMailer::setFrom()
+     * Adds CC recipient with email address and name.
+     * @see PHPMailer::addCC
+     * @see MultiMailer::_addEmails
+     * @param string $address CC recipient's email
+     * @param string $name optional CC recipient's name
+     */
+    protected function _cc($address, $name = '')
+    {
+        $this->_phpmailer->addCC($address, $name);
+        $this->_addEmails($address, $name);
+    }
+    
+    /**
+     * Adds BCC recipient with email address and name.
+     * @see PHPMailer::addBCC
+     * @see MultiMailer::_addEmails
+     * @param string $address BCC recipient's email
+     * @param string $name optional BCC recipient's name
+     */
+    protected function _bcc($address, $name = '')
+    {
+        $this->_phpmailer->addBCC($address, $name);
+        $this->_addEmails($address, $name);
+    }
+    
+    /**
+     * Sets 'from' header.
+     * @see PHPMailer::setFrom
      * @param string $address sender's email address
      * @param string $name optional sender's name
      * @param boolean $auto sets 'reply to' header automatically to the same address if true
      * @param boolean $skipInit if true skips initiation check
-     * @see setDefaultPHPMailerOptions()
+     * @see MultiMailer::setDefaultPHPMailerOptions
      * @return \MultiMailer
      */
     public function from($address, $name = '', $auto = true, $skipInit = false)
@@ -508,14 +744,14 @@ class MultiMailer extends CApplicationComponent
     }
     
     /**
-     * Set 'reply to' header.
+     * Sets 'reply to' header.
      * This is optional method to use when 'reply to' address is different than
      * 'from' address. In any other case this is set automatically.
-     * @see PHPMailer::addReplyTo()
+     * @see PHPMailer::addReplyTo
      * @param string $address email address to reply to
      * @param string $name optional name to reply to
      * @param boolean $skipInit if true skips initiation check
-     * @see setDefaultPHPMailerOptions()
+     * @see MultiMailer::setDefaultPHPMailerOptions
      * @return \MultiMailer
      */
     public function replyto($address, $name = '', $skipInit = false)
@@ -528,7 +764,7 @@ class MultiMailer extends CApplicationComponent
     }
     
     /**
-     * Set email subject for initialised object.
+     * Sets email subject for initialised object.
      * @param string $subject email subject
      * @return \MultiMailer
      */
@@ -542,11 +778,11 @@ class MultiMailer extends CApplicationComponent
     }
     
     /**
-     * Set email body with additional parameters for initialised object.
-     * @see PHPMailer::msgHTML()
+     * Sets email body with additional parameters for initialised object.
+     * @see PHPMailer::msgHTML
      * @param string|array $body email body
      * This is string for non-templated email or array for templated one.
-     * @see _processBody()
+     * @see MultiMailer::_processBody
      * @param string $basedir optional baseline directory for path
      * @param boolean $advanced whether to use the advanced HTML to text converter
      * @return \MultiMailer
@@ -563,7 +799,7 @@ class MultiMailer extends CApplicationComponent
     }
     
     /**
-     * Set alternative body (optionally) for initialised object.
+     * Sets alternative body (optionally) for initialised object.
      * You can skip this method for setContentType = html because AltBody is set
      * automatically when adding html body content.
      * @param string $altbody alternative plain text body
@@ -579,11 +815,11 @@ class MultiMailer extends CApplicationComponent
     }
     
     /**
-     * Process the email body with optional template.
-     * @see PHPMailer::msgHTML()
-     * @see $_template
-     * @see $_body
-     * @see Yii::renderPartial()
+     * Processes the email body with optional template.
+     * @see PHPMailer::msgHTML
+     * @see MultiMailer::$_template
+     * @see MultiMailer::$_body
+     * @see Yii::renderPartial
      * When using email template make sure to set proper view name ($_template)
      * i.e. use '//' at the beginning etc. and to set all the template variables
      * as $_body array keys with values.
@@ -613,9 +849,9 @@ class MultiMailer extends CApplicationComponent
     }
     
     /**
-     * Set email template for initialised object.
+     * Sets email template for initialised object.
      * @param string $template view name
-     * @see Yii::renderPartial()
+     * @see Yii::renderPartial
      * @return \MultiMailer
      */
     public function template($template)
@@ -628,8 +864,8 @@ class MultiMailer extends CApplicationComponent
     }
     
     /**
-     * Prepare email body and send (or save) email
-     * @see PHPMailer::Send()
+     * Prepares email body and sends (or saves) email
+     * @see PHPMailer::Send
      * @return boolean whether email has been sent (or saved)
      */
     public function send()
@@ -666,10 +902,10 @@ class MultiMailer extends CApplicationComponent
     }
     
     /**
-     * Validate and save email in database using AR model for every recipient.
-     * @see $setDbModelColumns
-     * @see Yii::setAttribute()
-     * @see Yii::save()
+     * Validates and saves email in database using AR model for every recipient.
+     * @see MultiMailer::$setDbModelColumns
+     * @see Yii::setAttribute
+     * @see Yii::save
      * @throws Exception
      */
     protected function _saveModel()

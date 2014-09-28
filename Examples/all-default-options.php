@@ -1,7 +1,7 @@
 <?php
 /**
  * @author Pawel Bizley Brzozowski
- * @version 1.0
+ * @version 1.1
  * 
  * MultiMailer list of all default configuration options here so you can see 
  * what is unnecessary to set.
@@ -45,6 +45,13 @@ return array(
                 'SMTPAuth'      => true,
                 'Username'      => 'yourname@example.com',
                 'Password'      => 'yourpassword',
+            ),
+            'setPopOptions'         => array(
+                'Port'          => false,
+                'Timeout'       => false,
+                'Username'      => '',
+                'Password'      => '',
+                'Debug'         => 0,
             ),
         ),
         // ...
