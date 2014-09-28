@@ -74,3 +74,13 @@ You need to prepare the database table for email storage with Active Record mode
 See the documentation for information about adding or switching the columns off.
 
 The usage in this case is the same as before but remember that method send() will not actually *send* the email but will save it in database.
+
+Available methods
+=================
+
+- mail()
+- SMTP
+- Gmail
+- POP before SMTP
+- Sendmail
+- qmail
