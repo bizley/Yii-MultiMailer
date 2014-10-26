@@ -1,7 +1,7 @@
 <?php
 /**
  * @author Pawel Bizley Brzozowski
- * @version 1.1
+ * @version 1.11
  * 
  * MultiMailer is the Yii extension created to send or store emails in database
  * with the help of the amazing PHPMailer class.
@@ -13,7 +13,7 @@
  * @see http://www.yiiframework.com
  * @see https://github.com/yiisoft/yii
  * 
- * MultiMailer 1.1 uses PHPMailer version 5.2.8.
+ * MultiMailer 1.11 uses PHPMailer version 5.2.8.
  * @see http://phpmailer.worxware.com
  * @see https://github.com/Synchro/PHPMailer
  * 
