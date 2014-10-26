@@ -887,7 +887,7 @@ class MultiMailer extends CApplicationComponent
             }
             catch(phpmailerException $e) {
                 
-                $this->setMultiError($e->_errorMessage());
+                $this->setMultiError($e->errorMessage());
                 return false;
             }
             catch(Exception $e) {
