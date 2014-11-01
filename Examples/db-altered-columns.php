@@ -3,8 +3,8 @@
  * @author Pawel Bizley Brzozowski
  * @version 1.2
  * 
- * MultiMailer default DB implementation
- * This sets DB method with minimum options.
+ * MultiMailer DB implementation
+ * This sets DB method with altered columns.
  */
 
 /**
@@ -24,6 +24,11 @@ return array(
             'setFromName'       => 'Example',
             'setMethod'         => 'DB',
             'setDbModel'        => 'Email',
+            'setDbModelColumns' => array(
+                'alt'       => null,
+                'body'      => 'content',
+                'email'     => 'address',
+            ),
         ),
         // ...
     ),
@@ -37,11 +42,11 @@ return array(
  * 
  * CREATE TABLE IF NOT EXISTS `emails` (
  *  `id` INT NOT NULL AUTO_INCREMENT,
- *  `email` VARCHAR(255) NOT NULL,
+ *  `address` VARCHAR(255) NOT NULL,
  *  `name` VARCHAR(255) NOT NULL,
  *  `subject` VARCHAR(255) NOT NULL,
- *  `body` TEXT NOT NULL,
- *  `alt` TEXT DEFAULT NULL,
+ *  `content` TEXT NOT NULL,
+ *  `status` TINYINT(1) NOT NULL,
  *  PRIMARY KEY (`id`)
  * ) ENGINE=InnoDB;
  */
@@ -62,10 +67,10 @@ class Email extends CActiveRecord
     public function rules()
     {
         return array(
-            array('email, name, subject, body', 'required'),
-            array('email, name, subject', 'length', 'max' => 255),
-            array('email', 'email'),
-            array('email, name, subject', 'safe', 'on' => 'search'),
+            array('address, name, subject, content', 'required'),
+            array('address, name, subject', 'length', 'max' => 255),
+            array('address', 'email'),
+            array('address, name, subject', 'safe', 'on' => 'search'),
         );
     }
 
@@ -93,6 +98,7 @@ class ExampleController extends Controller
         $mailer = Yii::app()->MultiMailer->to($recipientEmail, $recipientName);
         $mailer->subject($emailSubject);
         $mailer->body($emailBody);
+        $mailer->db('status', 1);
 
         if ($mailer->send()) {
             $result = 'Test email has been saved in database successfully.';

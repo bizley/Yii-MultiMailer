@@ -1,7 +1,7 @@
 <?php
 /**
  * @author Pawel Bizley Brzozowski
- * @version 1.0
+ * @version 1.2
  * 
  * MultiMailer MAIL implementation with body template
  * This sets default MAIL method with the template option.

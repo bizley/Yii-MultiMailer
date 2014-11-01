@@ -39,6 +39,7 @@ How to use it
     }
     else {
         // error
+        echo $mailer->getMultiError();
     }
 
 You can chain the methods like:

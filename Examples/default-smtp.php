@@ -1,7 +1,7 @@
 <?php
 /**
  * @author Pawel Bizley Brzozowski
- * @version 1.0
+ * @version 1.2
  * 
  * MultiMailer default SMTP implementation
  * This sets SMTP method with minimum options.

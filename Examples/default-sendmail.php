@@ -1,7 +1,7 @@
 <?php
 /**
  * @author Pawel Bizley Brzozowski
- * @version 1.1
+ * @version 1.2
  * 
  * MultiMailer default SENDMAIL implementation
  * This sets default SENDMAIL method with minimum options.

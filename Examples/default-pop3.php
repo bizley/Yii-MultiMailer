@@ -1,7 +1,7 @@
 <?php
 /**
  * @author Pawel Bizley Brzozowski
- * @version 1.1
+ * @version 1.2
  * 
  * MultiMailer default POP before SMTP implementation
  * This sets POP3 method with minimum options.
