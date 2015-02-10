@@ -1,7 +1,7 @@
 <?php
 /**
  * @author Paweł Bizley Brzozowski
- * @version 1.2
+ * @version 1.3
  * @license http://opensource.org/licenses/bsd-license.php
  * 
  * MultiMailer is the Yii extension created to send or store emails in database
@@ -15,9 +15,8 @@
  * @see http://www.yiiframework.com
  * @see https://github.com/yiisoft/yii
  * 
- * MultiMailer 1.2 uses PHPMailer version 5.2.8.
- * @see http://phpmailer.worxware.com
- * @see https://github.com/Synchro/PHPMailer
+ * MultiMailer 1.3 uses PHPMailer version 5.2.9
+ * @see https://github.com/PHPMailer/PHPMailer
  * 
  * Available methods:
  * mail()
@@ -29,7 +28,7 @@
  * database storage
  */
 
-require_once \dirname(__FILE__) . DIRECTORY_SEPARATOR . 'PHPMailer' . DIRECTORY_SEPARATOR . 'PHPMailerAutoload.php';
+require_once \dirname(__FILE__) . DIRECTORY_SEPARATOR . 'PHPMailer-5.2.9' . DIRECTORY_SEPARATOR . 'PHPMailerAutoload.php';
 
 class MultiMailer extends CApplicationComponent
 {
@@ -239,8 +238,8 @@ class MultiMailer extends CApplicationComponent
      *  'Debug' => 0,  // default value
      * )
      * Options marked above as default can be skipped.
-     * Option 'Host' will be used as STMP 'Host' so you don't have to set 
-     * it twice.
+     * Remember to set options for SMTP in $setOptions as well ('SMTPAuth' is 
+     * set automatically to false).
      * @see PHPMailer POP3 class documentation for details
      * @since 1.1
      */
@@ -307,12 +306,9 @@ class MultiMailer extends CApplicationComponent
         $password   = !empty($this->setPopOptions['Password']) ? $this->setPopOptions['Password'] : '';
         $debug      = !empty($this->setPopOptions['Debug']) ? $this->setPopOptions['Debug'] : 0;
         
-        $pop = new POP3();
-        $pop->authorise($host, $port, $timeout, $username, $password, $debug);
+        $this->_phpmailer->SMTPAuth = false;
         
-        $this->_phpmailer->Host = $host;
-        
-        return true;
+        return POP3::popBeforeSmtp($host, $port, $timeout, $username, $password, $debug);
     }
     
     /**
@@ -939,7 +935,7 @@ class MultiMailer extends CApplicationComponent
                     $this->_saveModel();
                 }
                 else {
-                    $this->_phpmailer->Send();
+                    $this->_phpmailer->send();
                 }
                 
                 return true;

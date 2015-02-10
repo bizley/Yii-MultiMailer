@@ -1,7 +1,7 @@
 <?php
 /**
  * @author Pawel Bizley Brzozowski
- * @version 1.2
+ * @version 1.3
  * 
  * MultiMailer default QMAIL implementation
  * This sets default QMAIL method with minimum options.

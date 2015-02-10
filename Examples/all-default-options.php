@@ -1,7 +1,7 @@
 <?php
 /**
  * @author Pawel Bizley Brzozowski
- * @version 1.2
+ * @version 1.3
  * 
  * MultiMailer list of all default configuration options here so you can see 
  * what is unnecessary to set.

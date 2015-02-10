@@ -1,7 +1,7 @@
 <?php
 /**
  * @author Pawel Bizley Brzozowski
- * @version 1.2
+ * @version 1.3
  * 
  * MultiMailer default POP before SMTP implementation
  * This sets POP3 method with minimum options.
@@ -27,6 +27,9 @@ return array(
                 'Host'      => 'pop3.example.com',
                 'Username'  => 'pop3username@example.com',
                 'Password'  => 'pop3password',
+            ),
+            'setOptions'        => array(
+                'Host'      => 'smtp.example.com',
             ),
         ),
         // ...
