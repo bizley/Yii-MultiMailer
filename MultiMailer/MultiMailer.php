@@ -943,17 +943,14 @@ class MultiMailer extends CApplicationComponent
             catch(phpmailerException $e) {
                 
                 $this->setMultiError($e->errorMessage());
-                return false;
             }
             catch(Exception $e) {
                 
                 $this->setMultiError($e->getMessage());
-                return false;
             }
         }
-        else {
-            return false;
-        }
+
+        return false;
     }
     
     /**
