@@ -1,7 +1,7 @@
 <?php
 /**
  * @author Paweł Bizley Brzozowski
- * @version 1.3
+ * @version 1.4 beta
  * @license http://opensource.org/licenses/bsd-license.php
  * 
  * MultiMailer is the Yii extension created to send or store emails in database
@@ -15,7 +15,7 @@
  * @see http://www.yiiframework.com
  * @see https://github.com/yiisoft/yii
  * 
- * MultiMailer 1.3 uses PHPMailer version 5.2.9
+ * MultiMailer 1.4 uses PHPMailer version 5.2.9
  * @see https://github.com/PHPMailer/PHPMailer
  * 
  * Available methods:
@@ -61,6 +61,7 @@ class MultiMailer extends CApplicationComponent
     const ERR_DB_PROPERTY_OTHERS        = 'Invalid database AR email model property.';
     const ERR_DB_PROPERTY_TYPE          = 'Database AR email model property must be of string or null type or false.';
     const ERR_EMAIL_INVALID             = 'Invalid email address.';
+    const ERR_LANG_NOT_FOUND            = 'Language cannot be found.';
     const ERR_PHPMAILER_NOT_SET         = 'PHPMailer need to be set first.';
     const ERR_POP3_NOT_SET              = 'PHPMailer POP3 options not set.';
     const ERR_YII_CONTROLLER_NOT_SET    = 'Yii controller is not set.';
@@ -195,6 +196,14 @@ class MultiMailer extends CApplicationComponent
      * @var string sender's name, default ''.
      */
     public $setFromName = '';
+    /**
+     * @var mixed string with language code (ISO 639-1 2-character) or array 
+     * with the above code and path to the language file directory, with 
+     * trailing separator (slash)
+     * @see PHPMailer::setLanguage
+     * @since 1.4
+     */
+    public $setLanguage = '';
     /**
      * @var boolean flag to switch logging on, default true.
      * @see Yii::log
@@ -753,10 +762,88 @@ class MultiMailer extends CApplicationComponent
     }
     
     /**
+     * Adds an attachment from a path on the filesystem for initialised object.
+     * Returns false if the file could not be found or read.
+     * @param string $path path to the attachment.
+     * @param string $name overrides the attachment name.
+     * @param string $encoding file encoding (options: "8bit", "7bit", "binary", 
+     * "base64", and "quoted-printable").
+     * @param string $type file extension (MIME) type.
+     * @param string $disposition disposition to use
+     * @see PHPMailer::addAttachment
+     * @since 1.4
+     * @return boolean
+     */
+    public function attachment($path, $name = '', $encoding = 'base64', $type = '', $disposition = 'attachment')
+    {
+        if ($this->_initState) {
+            
+            try {
+                
+                return $this->_phpmailer->addAttachment($path, $name, $encoding, $type, $disposition);
+            }
+            catch(phpmailerException $e) {
+                
+                $this->setMultiError($e->errorMessage());
+            }
+            catch(Exception $e) {
+                
+                $this->setMultiError($e->getMessage());
+            }
+        }
+
+        return false;
+    }
+    
+    /**
+     * Adds the list of attachments from a path on the filesystem for 
+     * initialised object.
+     * Returns false if one of the files could not be found or read.
+     * @param array $attachments arrays of files data
+     * @see MultiMailer::attachment
+     * @see PHPMailer::addAttachment
+     * @since 1.4
+     * @return boolean
+     */
+    public function attachments($attachments)
+    {
+        if ($this->_initState) {
+            
+            try {
+                
+                foreach ($attachments as $attachment) {
+                    if (!$this->_phpmailer->addAttachment(
+                            $attachment[0], 
+                            !empty($attachment[1]) ? $attachment[1] : '', 
+                            !empty($attachment[2]) ? $attachment[2] : 'base64', 
+                            !empty($attachment[3]) ? $attachment[3] : '', 
+                            !empty($attachment[4]) ? $attachment[4] : 'attachment'
+                        )) {
+                        
+                        return false;
+                    }
+                }
+                
+                return true;
+            }
+            catch(phpmailerException $e) {
+                
+                $this->setMultiError($e->errorMessage());
+            }
+            catch(Exception $e) {
+                
+                $this->setMultiError($e->getMessage());
+            }
+        }
+
+        return false;
+    }
+    
+    /**
      * Adds blind carbon copy recipient with email address and name for 
      * initialised object.
-     * Note that in case of DB method BCC recipients are treated as 
-     * regular ones.
+     * Note that in case of DB method BCC recipients are treated as regular 
+     * ones.
      * @see PHPMailer::addBCC
      * @see MultiMailer::_bcc
      * @param string $address BCC recipient's email address
@@ -768,6 +855,35 @@ class MultiMailer extends CApplicationComponent
     {
         if ($this->_initState) {
             $this->_bcc($address, $name);
+        }
+        
+        return $this;
+    }
+    
+    /**
+     * Adds list of blind carbon copy recipients with email address and name for 
+     * initialised object.
+     * Array can contain only strings with email addresses or can contain arrays 
+     * of email address and name of each recipient i.e.
+     * array('email1@example.com', 'email2@example.com', array('email2@example.com', 'Example3'))
+     * Note that in case of DB method BCC recipients are treated as regular ones.
+     * @see PHPMailer::addBCC
+     * @see MultiMailer::_bcc
+     * @param array $addresses bcc recipients data
+     * @since 1.4
+     * @return \MultiMailer
+     */
+    public function bccs($addresses)
+    {
+        if ($this->_initState) {
+            foreach ($addresses as $address) {
+                if (is_array($address)) {
+                    $this->_bcc($address[0], !empty($address[1]) ? $address[1] : '');
+                }
+                else {
+                    $this->_bcc($address);
+                }
+            }
         }
         
         return $this;
@@ -809,6 +925,35 @@ class MultiMailer extends CApplicationComponent
     {
         if ($this->_initState) {
             $this->_cc($address, $name);
+        }
+        
+        return $this;
+    }
+    
+    /**
+     * Adds list of carbon copy recipients with email address and name for 
+     * initialised object.
+     * Array can contain only strings with email addresses or can contain arrays 
+     * of email address and name of each recipient i.e.
+     * array('email1@example.com', 'email2@example.com', array('email2@example.com', 'Example3'))
+     * Note that in case of DB method CC recipients are treated as regular ones.
+     * @see PHPMailer::addCC
+     * @see MultiMailer::_cc
+     * @param array $addresses cc recipients data
+     * @since 1.4
+     * @return \MultiMailer
+     */
+    public function ccs($addresses)
+    {
+        if ($this->_initState) {
+            foreach ($addresses as $address) {
+                if (is_array($address)) {
+                    $this->_cc($address[0], !empty($address[1]) ? $address[1] : '');
+                }
+                else {
+                    $this->_cc($address);
+                }
+            }
         }
         
         return $this;
@@ -1006,6 +1151,57 @@ class MultiMailer extends CApplicationComponent
     }
     
     /**
+     * Sets the language for PHPMailer error messages.
+     * Returns false if it cannot load the language file.
+     * The default language is English.
+     * @param string $langcode ISO 639-1 2-character language code
+     * @param string $lang_path Path to the language file directory, with 
+     * trailing separator (slash)
+     * You can set global $setLanguage parameter with just the $langcode or the 
+     * array with $langcode and $lang_path.
+     * @return boolean
+     */
+    public function setLanguage($langcode = 'en', $lang_path = '')
+    {
+        if (!is_null($this->_phpmailer)) {
+            $changeLanguage = false;
+            if ($langcode !== 'en' || $lang_path !== '') {
+                $changeLanguage = true;
+            }
+            else {
+                if ($this->setLanguage !== '') {
+                    if (is_array($this->setLanguage)) {
+                        if (isset($this->setLanguage[0]) && $this->setLanguage[0] !== '') {
+                            $langcode = $this->setLanguage[0];
+                            $changeLanguage = true;
+                        }
+                        if (isset($this->setLanguage[1]) && $this->setLanguage[1] !== '') {
+                            $lang_path = $this->setLanguage[1];
+                            $changeLanguage = true;
+                        }
+                    }
+                    else {
+                        $langcode = $this->setLanguage;
+                        $changeLanguage = true;
+                    }
+                }
+            }
+            if ($changeLanguage) {
+                if (!$this->_phpmailer->setLanguage($langcode, $lang_path)) {
+                    $this->setMultiError(self::ERR_LANG_NOT_FOUND);
+                    return false;
+                }
+            }
+        }
+        else {
+            $this->setMultiError(self::ERR_PHPMAILER_NOT_SET);
+            return false;
+        }
+        
+        return true;
+    }
+    
+    /**
      * Sets and logs (optionally) error message.
      * @param string $error error message
      * @see Yii::log
@@ -1032,7 +1228,9 @@ class MultiMailer extends CApplicationComponent
         
         foreach ($this->setOptions as $name => $value) {
             $this->_phpmailer->$name = $value;
-        }        
+        }
+        
+        $this->setLanguage();
     }
     
     /**
@@ -1076,6 +1274,34 @@ class MultiMailer extends CApplicationComponent
     {
         if ($this->_initState) {
             $this->_to($address, $name);
+        }
+        
+        return $this;
+    }
+    
+    /**
+     * Adds list of recipients with email address and name for initialised 
+     * object.
+     * Array can contain only strings with email addresses or can contain arrays 
+     * of email address and name of each recipient i.e.
+     * array('email1@example.com', 'email2@example.com', array('email2@example.com', 'Example3'))
+     * @see PHPMailer::addAddress
+     * @see MultiMailer::_to
+     * @param array $addresses recipients data
+     * @since 1.4
+     * @return \MultiMailer
+     */
+    public function tos($addresses)
+    {
+        if ($this->_initState) {
+            foreach ($addresses as $address) {
+                if (is_array($address)) {
+                    $this->_to($address[0], !empty($address[1]) ? $address[1] : '');
+                }
+                else {
+                    $this->_to($address);
+                }
+            }
         }
         
         return $this;
