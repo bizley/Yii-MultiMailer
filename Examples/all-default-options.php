@@ -1,7 +1,7 @@
 <?php
 /**
  * @author Pawel Bizley Brzozowski
- * @version 1.3
+ * @version 1.4
  * 
  * MultiMailer list of all default configuration options here so you can see 
  * what is unnecessary to set.
@@ -31,6 +31,7 @@ return array(
             'setExternalExceptions' => true,
             'setFromAddress'        => '',
             'setFromName'           => '',
+            'setLanguage'           => '',
             'setMethod'             => 'MAIL',
             'setOptions'            => array(
                 'action_function'       => '',
