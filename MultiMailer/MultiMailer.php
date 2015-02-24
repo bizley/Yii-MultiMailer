@@ -1,7 +1,7 @@
 <?php
 /**
  * @author Paweł Bizley Brzozowski
- * @version 1.4 beta
+ * @version 1.4
  * @license http://opensource.org/licenses/bsd-license.php
  * 
  * MultiMailer is the Yii extension created to send or store emails in database
@@ -197,7 +197,7 @@ class MultiMailer extends CApplicationComponent
      */
     public $setFromName = '';
     /**
-     * @var mixed string with language code (ISO 639-1 2-character) or array 
+     * @var string|array string with language code (ISO 639-1 2-character) or array 
      * with the above code and path to the language file directory, with 
      * trailing separator (slash)
      * @see PHPMailer::setLanguage
