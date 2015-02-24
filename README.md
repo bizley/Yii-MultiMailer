@@ -76,8 +76,8 @@ See the documentation for information about adding or switching the columns off.
 
 The usage in this case is the same as before but remember that method send() will not actually *send* the email but will save it in database.
 
-Available methods
-=================
+Available sending methods
+=========================
 
 - mail()
 - SMTP
@@ -85,3 +85,14 @@ Available methods
 - POP before SMTP
 - Sendmail
 - qmail
+
+List of quick-start extension methods
+=====================================
+
+- attachment() - add an attachment (option: attachments() - add the list of attachments)
+- bcc() - add a blind carbon copy recipient (options: bccs() - add the list of bcc recipients)
+- body() - set the email body text (option: set the list of prameters for template here and use template() to add template)
+- cc() - add a carbon copy recipient (option: ccs() - add the list of cc recipients)
+- send() - send the email
+- subject() - set the email subject
+- to() - add a recipient (option: tos() - add the list of recipients)
