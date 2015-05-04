@@ -1,22 +1,22 @@
 <?php
 /**
  * @author Paweł Bizley Brzozowski
- * @version 1.4
+ * @version 1.4.1
  * @license http://opensource.org/licenses/bsd-license.php
  * 
  * MultiMailer is the Yii extension created to send or store emails in database
  * with the help of the amazing PHPMailer class.
- * @see https://github.com/bizley-code/Yii-MultiMailer
- * @see http://www.yiiframework.com/extension/multimailer
+ * https://github.com/bizley-code/Yii-MultiMailer
+ * http://www.yiiframework.com/extension/multimailer
  * 
  * See Examples folder for configuration and usage examples.
  * 
  * MultiMailer requires Yii version 1.1.
- * @see http://www.yiiframework.com
- * @see https://github.com/yiisoft/yii
+ * http://www.yiiframework.com
+ * https://github.com/yiisoft/yii
  * 
- * MultiMailer 1.4 uses PHPMailer version 5.2.9
- * @see https://github.com/PHPMailer/PHPMailer
+ * MultiMailer 1.4.1 uses PHPMailer version 5.2.10
+ * https://github.com/PHPMailer/PHPMailer
  * 
  * Available methods:
  * mail()
@@ -28,7 +28,7 @@
  * database storage
  */
 
-require_once \dirname(__FILE__) . DIRECTORY_SEPARATOR . 'PHPMailer-5.2.9' . DIRECTORY_SEPARATOR . 'PHPMailerAutoload.php';
+require_once \dirname(__FILE__) . DIRECTORY_SEPARATOR . 'PHPMailer-5.2.10' . DIRECTORY_SEPARATOR . 'PHPMailerAutoload.php';
 
 class MultiMailer extends CApplicationComponent
 {
@@ -477,7 +477,7 @@ class MultiMailer extends CApplicationComponent
     /**
      * Initialises the MAIL method.
      * Emails are sent using mail() function.
-     * @see http://php.net/manual/en/function.mail.php
+     * http://php.net/manual/en/function.mail.php
      * This is the default method.
      * @return boolean
      */
