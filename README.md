@@ -1,12 +1,12 @@
 MultiMailer
 ===========
 
-Yii extension for sending or saving emails.
+Yii extension for sending or saving emails with templates and attachments.
 
 What it does
 ============
 
-This extension allows to send emails with the help of PHPMailer class or to store emails in database (to send them later using Java workers for example).
+This extension allows to send emails with the help of PHPMailer class or to store emails in database (for example to send them later using Java workers).
 
 Installation
 ============
@@ -24,8 +24,8 @@ Modify the main.php config file. For example:
         ),
     );
   
-This sets MultiMailer to send email using PHP mail() function with sender 'Your Website <from@yourwebsite.com>'.
-You can find more configuration examples in Examples folder.
+This sets MultiMailer to send email using PHP mail() function with sender ```'Your Website <from@yourwebsite.com>'```.
+You can find more configuration examples in *Examples* folder.
 
 How to use it
 =============
@@ -65,16 +65,11 @@ First the configuration:
         ),
     );
 
-You need to prepare the database table for email storage with Active Record model class ('Email' in the example above). Default table columns are:
-- 'email' 
-- 'name'
-- 'subject'
-- 'body'
-- 'alt'
+You need to prepare the database table for email storage with Active Record model class ('Email' in the example above). Default table columns are ```'email'```, ```'name'```, ```'subject'```, ```'body'``` and ```'alt'```.
 
 See the documentation for information about adding or switching the columns off.
 
-The usage in this case is the same as before but remember that method send() will not actually *send* the email but will save it in database.
+The usage in this case is the same as before but remember that method send() will not *send* the email but will actually save it in the database.
 
 Available sending methods
 =========================
