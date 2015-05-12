@@ -1,7 +1,7 @@
 <?php
 /**
  * @author Paweł Bizley Brzozowski
- * @version 1.4.1
+ * @version 1.4.2
  * @license http://opensource.org/licenses/bsd-license.php
  * 
  * MultiMailer is the Yii extension created to send or store emails in database
@@ -15,7 +15,7 @@
  * http://www.yiiframework.com
  * https://github.com/yiisoft/yii
  * 
- * MultiMailer 1.4.1 uses PHPMailer version 5.2.10
+ * MultiMailer 1.4.2 uses PHPMailer version 5.2.10
  * https://github.com/PHPMailer/PHPMailer
  * 
  * Available methods:
@@ -633,6 +633,7 @@ class MultiMailer extends CApplicationComponent
      * as $_body array keys with values.
      * This method automatically sets AltBody to plain text version of html text
      * body when $setContentType is 'html'.
+     * @throws Exception
      */
     protected function _processBody()
     {
@@ -640,8 +641,11 @@ class MultiMailer extends CApplicationComponent
             if (is_object(Yii::app()->controller)) {
                 $body = Yii::app()->controller->renderPartial($this->_template, $this->_body, true);
             }
+            elseif (is_object(Yii::app()->command)) {
+                $body = Yii::app()->command->renderFile($this->_template, $this->_body, true);
+            }
             else {
-                $this->setMultiError(self::ERR_YII_CONTROLLER_NOT_SET);
+                throw new Exception(self::ERR_YII_CONTROLLER_NOT_SET);
             }
         }
         else {
