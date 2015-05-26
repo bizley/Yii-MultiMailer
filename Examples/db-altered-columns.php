@@ -1,7 +1,7 @@
 <?php
 /**
  * @author Pawel Bizley Brzozowski
- * @version 1.3
+ * @version 1.5
  * 
  * MultiMailer DB implementation
  * This sets DB method with altered columns.
@@ -25,9 +25,9 @@ return array(
             'setMethod'         => 'DB',
             'setDbModel'        => 'Email',
             'setDbModelColumns' => array(
-                'alt'       => null,
-                'body'      => 'content',
-                'email'     => 'address',
+                'alt'   => null,
+                'body'  => 'content',
+                'email' => 'address',
             ),
         ),
         // ...
@@ -104,7 +104,7 @@ class ExampleController extends Controller
             $result = 'Test email has been saved in database successfully.';
         }
         else {
-            $result = 'Test email saving in database error!<br>' . $mailer->getMultiError();
+            $result = 'Test email saving in database error!<br>' . print_r($mailer->getMultiError(), true);
         }
         
         $this->render('index', array('result' => $result));

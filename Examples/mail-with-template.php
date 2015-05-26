@@ -1,7 +1,7 @@
 <?php
 /**
  * @author Pawel Bizley Brzozowski
- * @version 1.3
+ * @version 1.5
  * 
  * MultiMailer MAIL implementation with body template
  * This sets default MAIL method with the template option.
@@ -19,9 +19,9 @@ return array(
     'components' => array(
         // ...
         'MultiMailer' => array(
-            'class'             => 'ext.MultiMailer.MultiMailer',
-            'setFromAddress'    => 'example@example.com',
-            'setFromName'       => 'Example',
+            'class'          => 'ext.MultiMailer.MultiMailer',
+            'setFromAddress' => 'example@example.com',
+            'setFromName'    => 'Example',
         ),
         // ...
     ),
@@ -37,9 +37,9 @@ return array(
 
 ?>
 
-<h1>Hello <?php echo $user; ?></h1>
+<h1>Hello <?php echo $user ?></h1>
 <p>
-    This is test for email template <?php echo $template; ?>.<br>
+    This is test for email with template.<br>
     MultiMailer test.
 </p>
 
@@ -57,21 +57,17 @@ class ExampleController extends Controller
         $recipientEmail = 'recipient@example.com';
         $recipientName  = 'Example Name';
         $emailSubject   = 'Example email subject';
-        $emailViewName  = '//mail/mail';
-        $emailBodyVars  = array(
-            'user'      => 'Test User',
-            'template'  => $emailViewName,
-        );
+        $emailBodyVars  = array('user' => 'Test User');
         
         $mailer = Yii::app()->MultiMailer->to($recipientEmail, $recipientName);
         $mailer->subject($emailSubject);
-        $mailer->body($emailBodyVars)->template($emailViewName);
+        $mailer->body($emailBodyVars)->template('//mail/mail');
 
         if ($mailer->send()) {
             $result = 'Test email has been sent successfully.';
         }
         else {
-            $result = 'Test email sending error!<br>' . $mailer->getMultiError();
+            $result = 'Test email sending error!<br>' . print_r($mailer->getMultiError(), true);
         }
         
         $this->render('index', array('result' => $result));

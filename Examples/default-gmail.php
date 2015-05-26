@@ -1,7 +1,7 @@
 <?php
 /**
  * @author Pawel Bizley Brzozowski
- * @version 1.3
+ * @version 1.5
  * 
  * MultiMailer default GMAIL implementation
  * This sets GMAIL method with minimum options.
@@ -19,13 +19,13 @@ return array(
     'components' => array(
         // ...
         'MultiMailer' => array(
-            'class'             => 'ext.MultiMailer.MultiMailer',
-            'setFromAddress'    => 'example@example.com',
-            'setFromName'       => 'Example',
-            'setMethod'         => 'GMAIL',
-            'setOptions'        => array(
-                'Username'  => 'gmailusername@gmail.com',
-                'Password'  => 'gmailpassword',
+            'class'          => 'ext.MultiMailer.MultiMailer',
+            'setFromAddress' => 'example@example.com',
+            'setFromName'    => 'Example',
+            'setMethod'      => 'GMAIL',
+            'setOptions'     => array(
+                'Username' => 'gmailusername@gmail.com',
+                'Password' => 'gmailpassword',
             ),
         ),
         // ...
@@ -56,7 +56,7 @@ class ExampleController extends Controller
             $result = 'Test email has been sent successfully.';
         }
         else {
-            $result = 'Test email sending error!<br>' . $mailer->getMultiError();
+            $result = 'Test email sending error!<br>' . print_r($mailer->getMultiError(), true);
         }
         
         $this->render('index', array('result' => $result));

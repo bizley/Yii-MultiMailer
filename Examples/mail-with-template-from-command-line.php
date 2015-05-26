@@ -3,14 +3,15 @@
  * @author Pawel Bizley Brzozowski
  * @version 1.5
  * 
- * MultiMailer default SMTP implementation
- * This sets SMTP method with minimum options.
+ * MultiMailer MAIL implementation with body template to be sent with 
+ * command line (Yii::CConsoleCommand()) 
+ * This sets default MAIL method with the template option.
  */
 
 /**
  * -----------------------------------------------------------------------------
  * Configuration:
- * <Yii directory>/protected/config/main.php
+ * <Yii directory>/protected/config/console.php
  * -----------------------------------------------------------------------------
  */
 
@@ -22,12 +23,6 @@ return array(
             'class'          => 'ext.MultiMailer.MultiMailer',
             'setFromAddress' => 'example@example.com',
             'setFromName'    => 'Example',
-            'setMethod'      => 'SMTP',
-            'setOptions'     => array(
-                'Host'     => 'smtp.example.com',
-                'Username' => 'smtpusername@example.com',
-                'Password' => 'smtppassword',
-            ),
         ),
         // ...
     ),
@@ -36,22 +31,38 @@ return array(
 
 /**
  * -----------------------------------------------------------------------------
+ * Email body template:
+ * <Yii directory>/protected/views/mail/cli.php
+ * -----------------------------------------------------------------------------
+ */
+
+?>
+
+<h1>Hello <?php echo $user ?></h1>
+<p>
+    This is test for CLI email with template.<br>
+    MultiMailer test.
+</p>
+
+<?php
+/**
+ * -----------------------------------------------------------------------------
  * Usage:
  * -----------------------------------------------------------------------------
  */
 
-class ExampleController extends Controller
+class ExampleCommand extends CConsoleCommand
 {
-    public function actionIndex()
+    public function actionRun()
     {
         $recipientEmail = 'recipient@example.com';
         $recipientName  = 'Example Name';
         $emailSubject   = 'Example email subject';
-        $emailBody      = '<h1>Hello</h1><p>This is test.<br>MultiMailer test.</p>';
+        $emailBodyVars  = array('user' => 'Test User');
         
         $mailer = Yii::app()->MultiMailer->to($recipientEmail, $recipientName);
         $mailer->subject($emailSubject);
-        $mailer->body($emailBody);
+        $mailer->body($emailBodyVars)->template(Yii::app()->basePath . '/views/mail/cli.php');
 
         if ($mailer->send()) {
             $result = 'Test email has been sent successfully.';
