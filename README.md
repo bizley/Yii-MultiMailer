@@ -8,6 +8,13 @@ What it does
 
 This extension allows to send emails with the help of PHPMailer class or to store emails in database (for example to send them later using Java workers).
 
+The last version
+================
+
+This is the last version of Multimailer (excluding bug fixes). If you would like to upgrade PHPMailer version from now on just replace the content of PHPMailer 
+folder but test if every time because something might not work properly.
+I recommend switching to Yii 2.
+
 Installation
 ============
 
@@ -42,7 +49,7 @@ How to use it
         echo $mailer->getMultiError();
     }
 
-You can chain the methods like:
+You can chain the methods (except attachment() and attachments()) like:
 
     Yii::app()->MultiMailer->to('example@server.com', 'Recipient')->subject('Example email subject')->body('<h1>Hello</h1><p>This is test.<br>MultiMailer test.</p>')->send();
 

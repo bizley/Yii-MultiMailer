@@ -1,7 +1,7 @@
 <?php
 /**
  * @author Paweł Bizley Brzozowski
- * @version 1.5
+ * @version 1.6
  * @license BSD 2-Clause License
  * @see LICENSE file
  * 
@@ -10,7 +10,7 @@
  */
 
 Yii::import('ext.MultiMailer.*');
-require_once 'PHPMailer-5.2.10/PHPMailerAutoload.php';
+require_once 'PHPMailer/PHPMailerAutoload.php';
 
 class ProxyPHPMailer extends PHPMailer
 {

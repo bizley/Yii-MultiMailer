@@ -1,7 +1,7 @@
 <?php
 /**
  * @author Paweł Bizley Brzozowski
- * @version 1.5
+ * @version 1.6
  * @license BSD 2-Clause License
  * @see LICENSE file
  * 
@@ -16,7 +16,7 @@
  * http://www.yiiframework.com
  * https://github.com/yiisoft/yii
  * 
- * MultiMailer 1.5 uses PHPMailer version 5.2.10
+ * MultiMailer 1.6 uses PHPMailer version 5.2.14
  * https://github.com/PHPMailer/PHPMailer
  * PHPMailer is distributed under the LGPL 2.1 license.
  * 
@@ -438,7 +438,6 @@ class MultiMailer extends CApplicationComponent
     protected function _initDB()
     {
         if (!empty($this->setDbModel) && is_string($this->setDbModel)) {
-            
             foreach ($this->_defaultColumns as $key => $value) {
                 if (!isset($this->setDbModelColumns[$key])) {
                     $this->setDbModelColumns[$key] = $value;
@@ -686,18 +685,13 @@ class MultiMailer extends CApplicationComponent
     protected function _saveModel()
     {
         foreach ($this->_addresses as $address) {
-            
             try {
                 $this->_model = new $this->setDbModel;
 
                 if ($this->_model) {
-
                     foreach ($this->setDbModelColumns as $key => $value) {
-
                         if ($key != self::KEY_OTHERS) {
-
                             if (!is_null($value) || $value !== false) {
-
                                 switch ($key) {
                                     case self::COLUMN_EMAIL:
                                         $emailProperty = $address['email'];
@@ -784,6 +778,7 @@ class MultiMailer extends CApplicationComponent
     /**
      * Adds an attachment from a path on the filesystem for initialised object.
      * Returns false if the file could not be found or read.
+     * THIS METHOD CANNOT BE CHAINED WITH OTHERS.
      * @param string $path path to the attachment.
      * @param string $name overrides the attachment name.
      * @param string $encoding file encoding (options: "8bit", "7bit", "binary", 
@@ -797,16 +792,13 @@ class MultiMailer extends CApplicationComponent
     public function attachment($path, $name = '', $encoding = 'base64', $type = '', $disposition = 'attachment')
     {
         if ($this->_initState) {
-            
             try {
                 return $this->getPhpmailer()->addAttachment($path, $name, $encoding, $type, $disposition);
             }
             catch (phpmailerException $e) {
-                
                 $this->setMultiError($e->errorMessage());
             }
             catch (Exception $e) {
-                
                 $this->setMultiError($e->getMessage());
             }
         }
@@ -818,6 +810,7 @@ class MultiMailer extends CApplicationComponent
      * Adds the list of attachments from a path on the filesystem for 
      * initialised object.
      * Returns false if one of the files could not be found or read.
+     * THIS METHOD CANNOT BE CHAINED WITH OTHERS.
      * @param array $attachments arrays of files data
      * @see attachment()
      * @see PHPMailer::addAttachment()
@@ -827,7 +820,6 @@ class MultiMailer extends CApplicationComponent
     public function attachments($attachments)
     {
         if ($this->_initState) {
-            
             try {
                 foreach ($attachments as $attachment) {
                     if (!$this->getPhpmailer()->addAttachment(
@@ -841,15 +833,12 @@ class MultiMailer extends CApplicationComponent
                         return false;
                     }
                 }
-                
                 return true;
             }
             catch (phpmailerException $e) {
-                
                 $this->setMultiError($e->errorMessage());
             }
             catch (Exception $e) {
-                
                 $this->setMultiError($e->getMessage());
             }
         }
@@ -1108,7 +1097,6 @@ class MultiMailer extends CApplicationComponent
     public function send()
     {
         if ($this->_initState) {
-            
             try {
                 $this->_processBody();
                 
@@ -1122,11 +1110,9 @@ class MultiMailer extends CApplicationComponent
                 return true;
             }
             catch (phpmailerException $e) {
-                
                 $this->setMultiError($e->errorMessage());
             }
             catch (Exception $e) {
-                
                 $this->setMultiError($e->getMessage());
             }
         }
