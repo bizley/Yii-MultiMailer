@@ -11,8 +11,11 @@ This extension allows to send emails with the help of PHPMailer class or to stor
 The last version
 ================
 
-This is the last version of Multimailer (excluding bug fixes). If you would like to upgrade PHPMailer version from now on just replace the content of PHPMailer 
-folder but test if every time because something might not work properly.
+This is the last version of Multimailer (excluding bug fixes).  
+
+**This version does not include PHPMailer files because with the last critical issue being fixed I don't want to open your server to exploits with older versions.**  
+Please get the latest version of PHPMailer at https://github.com/PHPMailer/PHPMailer and place all the folders and files in `MultiMailer/PHPMailer` folder.
+
 I recommend switching to Yii 2.
 
 Installation
